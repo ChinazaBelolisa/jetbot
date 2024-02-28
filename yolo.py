@@ -44,16 +44,17 @@ ap.add_argument("-t", "--threshold", type=float, default=0.3,
 args = vars(ap.parse_args())
 
 # load the COCO class labels our YOLO model was trained on
-labelsPath = 'yolo-coco\\coco.names'
+labelsPath = os.path.join('yolo-coco', 'coco.names')
 LABELS = open(labelsPath).read().strip().split("\n")
+
 
 # initialize a list of colors to represent each possible class label
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 	dtype="uint8")
 
 # paths to the YOLO weights and model configuration
-weightsPath = 'yolo-coco\\yolov3.weights'
-configPath = 'yolo-coco\\yolov3.cfg'
+weightsPath = os.path.join('yolo-coco', 'yolov3.weights')
+configPath = os.path.join('yolo-coco', 'yolov3.cfg')
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
@@ -64,7 +65,7 @@ image = cv2.imread(args["image"])
 
 # determine only the *output* layer names that we need from YOLO
 ln = net.getLayerNames()
-ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+ln = [ln[i - 1] for i in net.getUnconnectedOutLayers().flatten()]
 
 # construct a blob from the input image and then perform a forward
 # pass of the YOLO object detector, giving us our bounding boxes and
@@ -131,5 +132,4 @@ if len(idxs) > 0:
 			0.5, color, 2)
 
 # show the output image
-cv2.imshow("Image", image)
-cv2.waitKey(0)
+cv2.imwrite("output_image.jpg", image)
